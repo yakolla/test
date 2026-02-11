@@ -1,0 +1,7 @@
+{
+  "name": "PixelChibi Sprite Generator",
+  "description": "Generate professional 2-head tall (chibi) pixel art sprite sheets for games based on your reference images using Gemini AI.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
