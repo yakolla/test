@@ -159,7 +159,7 @@ const App: React.FC = () => {
               </div>
               <h3 className="text-xl font-bold mb-2">Workspace Empty</h3>
               <p className="text-slate-500 max-w-sm mx-auto">
-                Generate a full set of 32x32 animations: 기본, 걷기, 공격, 피격, 죽기.
+                Generate a full set of 32x32 animations: 기본, 걷기, 공격, 피격, 죽기, 점프.
               </p>
             </div>
           )}
@@ -175,7 +175,7 @@ const App: React.FC = () => {
               </div>
               <h3 className="text-xl font-bold mb-2">Building 32x32 Animations...</h3>
               <p className="text-slate-500 max-w-sm mx-auto">
-                Mapping frames for Idle, Walk, Attack, Hit, and Death states.
+                Mapping frames for Idle, Walk, Attack, Hit, Death, and Jump states.
               </p>
               <div className="mt-8 flex gap-2">
                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>

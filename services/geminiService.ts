@@ -30,17 +30,20 @@ export const generateSpriteSheet = async (
     - **ANCHORING:** Maintain a consistent "feet position" (y-axis ground level) across every single frame in the sheet. This is critical for natural animation without jittering.
     - **PITCH/SCALE:** The character's size should be consistent across all frames (approximately 24-28 pixels tall within the 32x32 box to allow for movement headroom).
     
-    Animations Required (One per row, exactly 6 frames per row):
+    Animations Required (One per row, exactly 6 frames per row, total 6 rows):
     1. Idle (기본): 6 frames. Character standing, subtle breathing or hair movement.
     2. Walking (걷기): 6 frames. Full walk cycle. Ensure smooth leg transitions.
     3. Attacking (공격): 6 frames. Clear wind-up, impact, and follow-through.
     4. Damaged (피격): 6 frames. Recoil animation.
     5. Death (죽기): 6 frames. Falling down or fading away animation.
+    6. Jump/Special (점프/특수): 6 frames. Jumping or special action.
     
     Technical Details:
     - Perspective: Top-down 3/4 RPG perspective.
     - Background: ${settings.backgroundColor === 'transparent' ? 'Solid neutral grey' : `Solid ${settings.backgroundColor}`}.
-    - NO extra padding between tiles. Tiles must be edge-to-edge in a 6-column by 5-row grid.
+    - **NO GRID LINES:** Do NOT draw any grid lines, cell borders, or outlines between the sprites. The background must be a single solid color without any markings.
+    - **FILL THE SPACE:** The character should be large enough to fill most of the 32x32 tile (around 26-30 pixels tall) to maximize detail.
+    - NO extra padding between tiles. Tiles must be edge-to-edge in a 6-column by 6-row grid.
     - No text, labels, or UI elements in the final image.
   `;
 

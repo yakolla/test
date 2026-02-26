@@ -5,7 +5,7 @@ interface SpritePreviewProps {
   imageUrl: string;
 }
 
-type AnimationKey = 'idle' | 'walk' | 'attack' | 'hit' | 'death';
+type AnimationKey = 'idle' | 'walk' | 'attack' | 'hit' | 'death' | 'jump';
 
 interface AnimationConfig {
   label: string;
@@ -19,6 +19,7 @@ const ANIMATIONS: Record<AnimationKey, AnimationConfig> = {
   attack: { label: '공격 (Attack)', row: 2, frames: 6 },
   hit: { label: '피격 (Hit)', row: 3, frames: 6 },
   death: { label: '죽기 (Death)', row: 4, frames: 6 },
+  jump: { label: '점프 (Jump)', row: 5, frames: 6 },
 };
 
 export const SpritePreview: React.FC<SpritePreviewProps> = ({ imageUrl }) => {
@@ -80,12 +81,13 @@ export const SpritePreview: React.FC<SpritePreviewProps> = ({ imageUrl }) => {
                     className="absolute max-w-none"
                     style={{ 
                         imageRendering: 'pixelated',
-                        // Since it's a 6 column x 5 row grid
-                        left: `-${frame * 100}%`,
-                        top: `-${config.row * 100}%`,
+                        // Since it's a 6 column x 6 row grid
+                        // We shift by 1/6th of the image width per frame
+                        // and 1/6th of the image height per row
+                        left: `-${frame * (100 / 6)}%`,
+                        top: `-${config.row * (100 / 6)}%`,
                         width: `600%`, 
-                        height: `500%`,
-                        objectFit: 'fill'
+                        height: `600%`,
                     }}
                 />
             </div>

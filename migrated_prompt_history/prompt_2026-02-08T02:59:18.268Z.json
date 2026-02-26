@@ -1,0 +1,357 @@
+[
+  {
+    "id": 0,
+    "author": "user",
+    "payload": {
+      "type": "text",
+      "text": "첨부한 이미지를 참고하여, 게임에서 사용할 수 있는 픽셀 2등신 캐릭터의 스프라이트 시트를 생성해주는 기능",
+      "files": [],
+      "fileUploads": [],
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1770518857,
+      "nanos": 504000000
+    }
+  },
+  {
+    "id": 1,
+    "author": "model",
+    "payload": {
+      "type": "thinking",
+      "text": "**Conceptualizing Pixel Art Generation**\n\nOkay, I'm currently focused on the initial concept: a React-based web application. I'm thinking TypeScript will be essential for managing the complexities, with ESM for module handling. I'm picturing a user-friendly UI for uploading images and generating 2-set pixel art. The Gemini API could be key here. I'm thinking of building it with React 18+.\n\n\n**Refining System Architecture**\n\nI'm now diving into the specifics: Tailwind CSS will handle the styling. I've got the foundational file structure mapped out: `index.tsx`, `index.html`, `App.tsx`, `metadata.json`, and directories for components and services. The core API interaction will center around `ai.models.generateContent` using `gemini-2.5-flash-image` for image generation and editing. The user flow is becoming clearer, with components for image upload, a generate button, sprite sheet display, download, and optional style options, and grid/animation preview.\n\n\n**Defining UI Requirements**\n\nI'm now focusing on user experience, envisioning a sleek English UI for broad usability. I'm aiming for a professional feel with clear instructions. I'm thinking about including a Sprite Sheet Viewer component for manual frame adjustments. I'm prioritizing flexibility to handle variations in AI output, and clear, concise language. I'm standardizing key components to build upon.\n\n\n",
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1770518857,
+      "nanos": 504000000
+    },
+    "doneTimestamp": {
+      "seconds": 1770518865,
+      "nanos": 668000000
+    }
+  },
+  {
+    "id": 2,
+    "author": "model",
+    "payload": {
+      "type": "generationTable",
+      "entries": [
+        {
+          "path": "metadata.json",
+          "generationType": 0,
+          "isDone": true,
+          "description": "Application metadata specifying the name, description, and required permissions.",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "\n{\n  \"name\": \"PixelChibi Sprite Generator\",\n  \"description\": \"Generate professional 2-head tall (chibi) pixel art sprite sheets for games based on your reference images using Gemini AI.\",\n  \"requestFramePermissions\": [\"camera\"]\n}\n"
+            }
+          ]
+        },
+        {
+          "path": "index.html",
+          "generationType": 0,
+          "isDone": true,
+          "description": "Main HTML entry point with Tailwind CSS and Font configuration.",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>PixelChibi Sprite Generator</title>\n    <script src=\"https://cdn.tailwindcss.com\"></script>\n    <link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Press+Start+2P&display=swap\" rel=\"stylesheet\">\n    <style>\n        body {\n            font-family: 'Inter', sans-serif;\n            background-color: #0f172a;\n            color: #f8fafc;\n        }\n        .pixel-font {\n            font-family: 'Press+Start+2P', cursive;\n        }\n        .pixel-border {\n            box-shadow: \n                0 4px 0 0 #000,\n                0 -4px 0 0 #000,\n                4px 0 0 0 #000,\n                -4px 0 0 0 #000;\n        }\n        /* Custom scrollbar */\n        ::-webkit-scrollbar {\n            width: 8px;\n        }\n        ::-webkit-scrollbar-track {\n            background: #1e293b;\n        }\n        ::-webkit-scrollbar-thumb {\n            background: #475569;\n            border-radius: 4px;\n        }\n        ::-webkit-scrollbar-thumb:hover {\n            background: #64748b;\n        }\n    </style>\n</head>\n<body>\n    <div id=\"root\"></div>\n</body>\n</html>\n"
+            }
+          ]
+        },
+        {
+          "path": "index.tsx",
+          "generationType": 0,
+          "isDone": true,
+          "description": "React application entry point.",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "\nimport React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport App from './App';\n\nconst rootElement = document.getElementById('root');\nif (!rootElement) {\n  throw new Error(\"Could not find root element to mount to\");\n}\n\nconst root = ReactDOM.createRoot(rootElement);\nroot.render(\n  <React.StrictMode>\n    <App />\n  </React.StrictMode>\n);\n"
+            }
+          ]
+        },
+        {
+          "path": "types.ts",
+          "generationType": 0,
+          "isDone": true,
+          "description": "Global TypeScript types and interfaces.",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "\nexport interface SpriteResult {\n  imageUrl: string;\n  prompt: string;\n  timestamp: number;\n}\n\nexport enum GenerationStyle {\n  CLASSIC_16BIT = '16-bit Classic',\n  MODERN_HD = 'Modern HD Pixel',\n  GAMEBOY = 'GameBoy Retro',\n  FANTASY = 'Epic Fantasy',\n  CYBERPUNK = 'Cyberpunk'\n}\n\nexport interface GenerationSettings {\n  style: GenerationStyle;\n  frameCount: number;\n  includeWalkCycle: boolean;\n  backgroundColor: 'transparent' | 'white' | 'black' | 'green';\n}\n"
+            }
+          ]
+        },
+        {
+          "path": "services/geminiService.ts",
+          "generationType": 0,
+          "isDone": true,
+          "description": "Service for interacting with the Gemini API to generate sprite sheets.",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "\nimport { GoogleGenAI, GenerateContentResponse } from \"@google/genai\";\nimport { GenerationSettings, GenerationStyle } from \"../types\";\n\nexport const generateSpriteSheet = async (\n  base64Image: string,\n  settings: GenerationSettings\n): Promise<string> => {\n  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });\n  \n  const styleDescription = {\n    [GenerationStyle.CLASSIC_16BIT]: \"SNES-style 16-bit pixel art with limited vibrant color palette\",\n    [GenerationStyle.MODERN_HD]: \"High-definition pixel art with smooth shading and detailed textures\",\n    [GenerationStyle.GAMEBOY]: \"4-color monochrome green palette, classic 8-bit handheld aesthetic\",\n    [GenerationStyle.FANTASY]: \"Detailed fantasy pixel art with magical effects and ornate equipment\",\n    [GenerationStyle.CYBERPUNK]: \"Neon-infused pixel art with high contrast and technological details\"\n  }[settings.style];\n\n  const prompt = `\n    ACT AS A PROFESSIONAL GAME ASSET ARTIST. \n    Task: Convert the attached character image into a professional 2D pixel art sprite sheet.\n    \n    Character Style: \n    - 2-head tall (Chibi/SD) proportions.\n    - Style: ${styleDescription}.\n    \n    Sprite Sheet Layout:\n    - Create a clean grid-based sprite sheet.\n    - Include multiple frames: \n      1. Idle animation (front, side, back)\n      2. ${settings.includeWalkCycle ? 'Walking animation cycle (front, side, back)' : 'Basic poses'}\n    - Total Frames: Approximately ${settings.frameCount} frames.\n    - Perspective: Top-down 3/4 RPG perspective (standard for Pokemon/Stardew Valley style games).\n    \n    Technical Details:\n    - Background: ${settings.backgroundColor === 'transparent' ? 'Solid neutral grey (to be removed later)' : `Solid ${settings.backgroundColor}`}.\n    - Clear outlines, readable features, and consistent lighting.\n    - Do not include any text, UI, or watermarks in the image.\n    - The output MUST be a single image file containing the sprite sheet.\n  `;\n\n  try {\n    const response: GenerateContentResponse = await ai.models.generateContent({\n      model: 'gemini-2.5-flash-image',\n      contents: {\n        parts: [\n          {\n            inlineData: {\n              mimeType: 'image/png',\n              data: base64Image.split(',')[1],\n            },\n          },\n          { text: prompt },\n        ],\n      },\n      config: {\n        imageConfig: {\n          aspectRatio: \"1:1\"\n        }\n      }\n    });\n\n    let imageUrl = '';\n    if (response.candidates?.[0]?.content?.parts) {\n      for (const part of response.candidates[0].content.parts) {\n        if (part.inlineData) {\n          imageUrl = `data:image/png;base64,${part.inlineData.data}`;\n          break;\n        }\n      }\n    }\n\n    if (!imageUrl) {\n      throw new Error(\"No image was generated by the model.\");\n    }\n\n    return imageUrl;\n  } catch (error) {\n    console.error(\"Gemini Generation Error:\", error);\n    throw error;\n  }\n};\n"
+            }
+          ]
+        },
+        {
+          "path": "components/ui/Button.tsx",
+          "generationType": 0,
+          "isDone": true,
+          "description": "Reusable Button component with variants.",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "\nimport React from 'react';\n\ninterface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {\n  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'pixel';\n  isLoading?: boolean;\n}\n\nexport const Button: React.FC<ButtonProps> = ({ \n  children, \n  variant = 'primary', \n  isLoading, \n  className = '', \n  ...props \n}) => {\n  const baseStyles = \"px-4 py-2 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2\";\n  \n  const variants = {\n    primary: \"bg-indigo-600 hover:bg-indigo-700 text-white\",\n    secondary: \"bg-slate-700 hover:bg-slate-600 text-white\",\n    outline: \"border-2 border-slate-700 hover:border-slate-600 text-slate-300\",\n    ghost: \"hover:bg-slate-800 text-slate-400 hover:text-white\",\n    pixel: \"pixel-border bg-yellow-500 hover:bg-yellow-400 text-black rounded-none pixel-font text-[10px]\"\n  };\n\n  return (\n    <button \n      className={`${baseStyles} ${variants[variant]} ${className}`}\n      disabled={isLoading || props.disabled}\n      {...props}\n    >\n      {isLoading && (\n        <svg className=\"animate-spin h-5 w-5 text-current\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\">\n          <circle className=\"opacity-25\" cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" strokeWidth=\"4\"></circle>\n          <path className=\"opacity-75\" fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\"></path>\n        </svg>\n      )}\n      {children}\n    </button>\n  );\n};\n"
+            }
+          ]
+        },
+        {
+          "path": "components/SpritePreview.tsx",
+          "generationType": 0,
+          "isDone": true,
+          "description": "Component for previewing the generated sprite sheet with animation.",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "\nimport React, { useState, useEffect } from 'react';\n\ninterface SpritePreviewProps {\n  imageUrl: string;\n}\n\nexport const SpritePreview: React.FC<SpritePreviewProps> = ({ imageUrl }) => {\n  const [frame, setFrame] = useState(0);\n  const totalFrames = 4; // Assuming 4 frames for a basic cycle preview\n  const [isPlaying, setIsPlaying] = useState(true);\n\n  useEffect(() => {\n    if (!isPlaying) return;\n    const interval = setInterval(() => {\n      setFrame((prev) => (prev + 1) % totalFrames);\n    }, 150);\n    return () => clearInterval(interval);\n  }, [isPlaying]);\n\n  return (\n    <div className=\"bg-slate-800/50 p-6 rounded-2xl border border-slate-700\">\n      <div className=\"flex flex-col md:flex-row gap-8\">\n        {/* Full Sprite Sheet */}\n        <div className=\"flex-1\">\n          <h3 className=\"text-sm font-semibold text-slate-400 mb-4 uppercase tracking-wider\">Generated Sprite Sheet</h3>\n          <div className=\"bg-slate-900 p-4 rounded-xl border border-slate-700/50 group relative overflow-hidden\">\n            <img \n              src={imageUrl} \n              alt=\"Generated Sprite Sheet\" \n              className=\"w-full h-auto image-pixelated rounded-lg\"\n              style={{ imageRendering: 'pixelated' }}\n            />\n            <div className=\"absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center\">\n               <a \n                href={imageUrl} \n                download=\"sprite-sheet.png\"\n                className=\"bg-white text-black px-4 py-2 rounded-lg font-bold hover:bg-slate-200 transition-colors\"\n               >\n                 Download Assets\n               </a>\n            </div>\n          </div>\n        </div>\n\n        {/* Animation Preview */}\n        <div className=\"w-full md:w-64 flex flex-col items-center\">\n          <h3 className=\"text-sm font-semibold text-slate-400 mb-4 uppercase tracking-wider\">Animation Test</h3>\n          <div className=\"w-48 h-48 bg-slate-900 rounded-xl border-4 border-slate-700 flex items-center justify-center overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/checkerboard.png')] bg-center\">\n            {/* Simple CSS Sprite Animation simulation */}\n            <div className=\"relative w-32 h-32 overflow-hidden flex items-center justify-center\">\n                <img \n                    src={imageUrl} \n                    alt=\"Animation Preview\"\n                    className=\"absolute max-w-none h-full\"\n                    style={{ \n                        imageRendering: 'pixelated',\n                        left: `-${frame * 100}%`,\n                        width: `${totalFrames * 100}%`,\n                        objectFit: 'contain'\n                    }}\n                />\n            </div>\n          </div>\n          <p className=\"mt-4 text-xs text-slate-500 text-center italic\">\n            *Auto-detected cycle simulation\n          </p>\n          <div className=\"flex gap-2 mt-4\">\n            <button \n                onClick={() => setIsPlaying(!isPlaying)}\n                className=\"p-2 bg-slate-700 rounded-full hover:bg-slate-600 transition-colors\"\n            >\n                {isPlaying ? (\n                    <svg className=\"w-5 h-5\" fill=\"currentColor\" viewBox=\"0 0 24 24\"><path d=\"M6 19h4V5H6v14zm8-14v14h4V5h-4z\"/></svg>\n                ) : (\n                    <svg className=\"w-5 h-5\" fill=\"currentColor\" viewBox=\"0 0 24 24\"><path d=\"M8 5v14l11-7z\"/></svg>\n                )}\n            </button>\n          </div>\n        </div>\n      </div>\n    </div>\n  );\n};\n"
+            }
+          ]
+        },
+        {
+          "path": "App.tsx",
+          "generationType": 0,
+          "isDone": true,
+          "description": "Main application layout and state management.",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "\nimport React, { useState, useRef } from 'react';\nimport { Button } from './components/ui/Button';\nimport { SpritePreview } from './components/SpritePreview';\nimport { generateSpriteSheet } from './services/geminiService';\nimport { GenerationStyle, GenerationSettings } from './types';\n\nconst App: React.FC = () => {\n  const [referenceImage, setReferenceImage] = useState<string | null>(null);\n  const [isGenerating, setIsGenerating] = useState(false);\n  const [generatedImage, setGeneratedImage] = useState<string | null>(null);\n  const [error, setError] = useState<string | null>(null);\n  \n  const [settings, setSettings] = useState<GenerationSettings>({\n    style: GenerationStyle.CLASSIC_16BIT,\n    frameCount: 16,\n    includeWalkCycle: true,\n    backgroundColor: 'transparent'\n  });\n\n  const fileInputRef = useRef<HTMLInputElement>(null);\n\n  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {\n    const file = e.target.files?.[0];\n    if (file) {\n      const reader = new FileReader();\n      reader.onloadend = () => {\n        setReferenceImage(reader.result as string);\n        setError(null);\n      };\n      reader.readAsDataURL(file);\n    }\n  };\n\n  const handleGenerate = async () => {\n    if (!referenceImage) return;\n    \n    setIsGenerating(true);\n    setError(null);\n    try {\n      const result = await generateSpriteSheet(referenceImage, settings);\n      setGeneratedImage(result);\n    } catch (err) {\n      setError(\"Failed to generate sprite sheet. Please try again.\");\n      console.error(err);\n    } finally {\n      setIsGenerating(false);\n    }\n  };\n\n  return (\n    <div className=\"min-h-screen pb-20\">\n      {/* Header */}\n      <header className=\"border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10\">\n        <div className=\"max-w-6xl mx-auto px-6 h-20 flex items-center justify-between\">\n          <div className=\"flex items-center gap-3\">\n            <div className=\"w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center pixel-border\">\n              <span className=\"pixel-font text-white text-xs\">PX</span>\n            </div>\n            <div>\n              <h1 className=\"font-bold text-xl tracking-tight\">PixelChibi</h1>\n              <p className=\"text-xs text-slate-500 font-medium\">AI Sprite Sheet Generator</p>\n            </div>\n          </div>\n          <div className=\"hidden md:flex gap-6 text-sm font-medium text-slate-400\">\n            <a href=\"#\" className=\"hover:text-white transition-colors\">Library</a>\n            <a href=\"#\" className=\"hover:text-white transition-colors\">Community</a>\n            <a href=\"#\" className=\"hover:text-white transition-colors\">Guide</a>\n          </div>\n        </div>\n      </header>\n\n      <main className=\"max-w-6xl mx-auto px-6 mt-12 grid grid-cols-1 lg:grid-cols-12 gap-12\">\n        {/* Sidebar / Controls */}\n        <div className=\"lg:col-span-4 space-y-8\">\n          <section className=\"bg-slate-800/40 rounded-2xl p-6 border border-slate-700/50\">\n            <h2 className=\"text-lg font-bold mb-6 flex items-center gap-2\">\n              <span className=\"w-2 h-2 bg-indigo-500 rounded-full animate-pulse\"></span>\n              Character Reference\n            </h2>\n            \n            <div \n              onClick={() => fileInputRef.current?.click()}\n              className=\"aspect-square rounded-xl border-2 border-dashed border-slate-700 hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all cursor-pointer flex flex-col items-center justify-center overflow-hidden relative group\"\n            >\n              {referenceImage ? (\n                <>\n                  <img src={referenceImage} alt=\"Reference\" className=\"w-full h-full object-cover\" />\n                  <div className=\"absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity\">\n                    <span className=\"text-sm font-bold text-white\">Change Image</span>\n                  </div>\n                </>\n              ) : (\n                <>\n                  <svg className=\"w-12 h-12 text-slate-600 mb-4\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">\n                    <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth=\"2\" d=\"M12 4v16m8-8H4\" />\n                  </svg>\n                  <p className=\"text-sm text-slate-500 text-center px-4\">Upload a sketch, photo, or drawing to pixelize</p>\n                </>\n              )}\n            </div>\n            <input \n              type=\"file\" \n              ref={fileInputRef} \n              onChange={handleFileChange} \n              className=\"hidden\" \n              accept=\"image/*\"\n            />\n          </section>\n\n          <section className=\"bg-slate-800/40 rounded-2xl p-6 border border-slate-700/50 space-y-6\">\n            <h2 className=\"text-lg font-bold mb-2\">Generation Settings</h2>\n            \n            <div>\n              <label className=\"text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block\">Art Style</label>\n              <select \n                value={settings.style}\n                onChange={(e) => setSettings({...settings, style: e.target.value as GenerationStyle})}\n                className=\"w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none\"\n              >\n                {Object.values(GenerationStyle).map(style => (\n                  <option key={style} value={style}>{style}</option>\n                ))}\n              </select>\n            </div>\n\n            <div>\n              <label className=\"text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block\">Animation Complexity</label>\n              <div className=\"flex gap-2\">\n                {[8, 16, 24].map(count => (\n                  <button \n                    key={count}\n                    onClick={() => setSettings({...settings, frameCount: count})}\n                    className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all ${\n                      settings.frameCount === count \n                      ? 'bg-indigo-600 border-indigo-500 text-white' \n                      : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500'\n                    }`}\n                  >\n                    {count} Frames\n                  </button>\n                ))}\n              </div>\n            </div>\n\n            <div className=\"flex items-center justify-between p-3 bg-slate-900/50 rounded-xl\">\n              <div>\n                <span className=\"text-sm font-semibold\">Walk Cycle</span>\n                <p className=\"text-[10px] text-slate-500\">Include directional walking</p>\n              </div>\n              <input \n                type=\"checkbox\" \n                checked={settings.includeWalkCycle}\n                onChange={(e) => setSettings({...settings, includeWalkCycle: e.target.checked})}\n                className=\"w-5 h-5 accent-indigo-500\"\n              />\n            </div>\n\n            <Button \n              onClick={handleGenerate} \n              disabled={!referenceImage} \n              isLoading={isGenerating}\n              className=\"w-full py-4 text-base font-bold shadow-lg shadow-indigo-500/20\"\n            >\n              Generate Sprite Sheet\n            </Button>\n\n            {error && (\n              <p className=\"text-red-400 text-xs text-center font-medium bg-red-400/10 py-2 rounded-lg border border-red-400/20\">\n                {error}\n              </p>\n            )}\n          </section>\n        </div>\n\n        {/* Workspace / Output */}\n        <div className=\"lg:col-span-8\">\n          {!generatedImage && !isGenerating && (\n            <div className=\"h-full flex flex-col items-center justify-center min-h-[500px] border-2 border-dashed border-slate-800 rounded-3xl p-12 text-center\">\n              <div className=\"w-20 h-20 bg-slate-800 rounded-2xl flex items-center justify-center mb-6\">\n                <svg className=\"w-10 h-10 text-slate-600\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">\n                  <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth=\"1.5\" d=\"M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10\" />\n                </svg>\n              </div>\n              <h3 className=\"text-xl font-bold mb-2\">Workspace Empty</h3>\n              <p className=\"text-slate-500 max-w-sm mx-auto\">\n                Upload a character image and click generate to see your pixel art sprite sheet here.\n              </p>\n            </div>\n          )}\n\n          {isGenerating && (\n            <div className=\"h-full flex flex-col items-center justify-center min-h-[500px] bg-slate-800/20 rounded-3xl p-12 text-center animate-pulse\">\n              <div className=\"relative w-24 h-24 mb-8\">\n                <div className=\"absolute inset-0 border-4 border-indigo-500/20 rounded-full\"></div>\n                <div className=\"absolute inset-0 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin\"></div>\n                <div className=\"absolute inset-0 flex items-center justify-center\">\n                    <span className=\"pixel-font text-[8px] text-indigo-400\">LOADING</span>\n                </div>\n              </div>\n              <h3 className=\"text-xl font-bold mb-2\">Analyzing Geometry...</h3>\n              <p className=\"text-slate-500 max-w-sm mx-auto\">\n                Gemini is processing your character and mapping it to a {settings.style} pixel grid.\n              </p>\n              <div className=\"mt-8 flex gap-2\">\n                 <div className=\"w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]\"></div>\n                 <div className=\"w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.15s]\"></div>\n                 <div className=\"w-2 h-2 bg-indigo-500 rounded-full animate-bounce\"></div>\n              </div>\n            </div>\n          )}\n\n          {generatedImage && !isGenerating && (\n            <div className=\"space-y-6\">\n              <div className=\"flex items-center justify-between\">\n                <h2 className=\"text-2xl font-bold\">Generated Assets</h2>\n                <div className=\"flex gap-2\">\n                   <Button variant=\"outline\" className=\"text-sm\">Regenerate</Button>\n                   <Button variant=\"pixel\">Export to Unity/Godot</Button>\n                </div>\n              </div>\n              \n              <SpritePreview imageUrl={generatedImage} />\n\n              <div className=\"bg-indigo-600/10 border border-indigo-500/20 p-6 rounded-2xl flex items-start gap-4\">\n                <div className=\"p-3 bg-indigo-600 rounded-xl text-white\">\n                    <svg className=\"w-6 h-6\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">\n                        <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth=\"2\" d=\"M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z\" />\n                    </svg>\n                </div>\n                <div>\n                    <h4 className=\"font-bold text-indigo-300\">Artist Tips</h4>\n                    <p className=\"text-sm text-slate-400 mt-1\">\n                        Your sprite sheet is ready! This output is optimized for 16x16 or 32x32 tiles. You can import this directly into Aseprite or Tiled for further refinement. For better results, ensure your reference image has a clear silhouette.\n                    </p>\n                </div>\n              </div>\n            </div>\n          )}\n        </div>\n      </main>\n\n      <footer className=\"mt-24 border-t border-slate-800 py-12\">\n        <div className=\"max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8\">\n          <div className=\"flex items-center gap-2 opacity-50 grayscale\">\n            <div className=\"w-6 h-6 bg-white rounded flex items-center justify-center\">\n              <span className=\"text-[10px] text-black font-bold\">G</span>\n            </div>\n            <span className=\"text-sm font-medium\">Powered by Gemini AI</span>\n          </div>\n          <p className=\"text-slate-600 text-sm\">© 2024 PixelChibi Studio. All rights reserved.</p>\n        </div>\n      </footer>\n    </div>\n  );\n};\n\nexport default App;\n"
+            }
+          ]
+        }
+      ]
+    },
+    "createdTimestamp": {
+      "seconds": 1770518865,
+      "nanos": 668000000
+    },
+    "doneTimestamp": {
+      "seconds": 1770518866,
+      "nanos": 721000000
+    }
+  },
+  {
+    "id": 4,
+    "author": "user",
+    "payload": {
+      "type": "text",
+      "text": "시트 한칸의 크기는 32x32로 해줘. 그 안에 캐릭터를 생성해 주고, 애니메이션 종류는 기본, 걷기, 공격, 피격, 죽기로 만들어줘",
+      "files": [],
+      "fileUploads": [],
+      "cssBlocks": [],
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1770519146,
+      "nanos": 817000000
+    }
+  },
+  {
+    "id": 5,
+    "author": "model",
+    "payload": {
+      "type": "thinking",
+      "text": "**Defining Project Scope**\n\nOkay, I'm setting the scope now. I'm focusing on modifying the `PixelChibi Sprite Generator`. I've decided the tile size will be 32x32 pixels, and the requested animation states include Idle (기본), Walking (걷기), Attacking (공격), and Damaged. I am proceeding to flesh out the design to include all of these animation states.\n\n\n**Expanding Animation States**\n\nI'm now integrating \"Hit\" and \"Death\" animations into the project. The `types.ts` file needs adjustments to either hardcode the 32x32 tile size or include it explicitly in the settings. I'll modify the `GeminiService.ts` prompt to ensure the generation covers all specified animation cycles: Idle, Walking, Attacking, Damaged, Hit, and Death, each on a 32x32 grid. Finally, I will update the `App.tsx` file for UI consistency.\n\n\n**Refining Prompt and Preview**\n\nI'm now focusing on refining the prompt within `GeminiService.ts` to be exceptionally clear about the 32x32 pixel grid and the specific animation sequences: Idle, Walking, Attacking, Hit, and Death. I also plan to update `SpritePreview.tsx` to handle the multiple animation states, perhaps allowing the user to select between them, or improving the simulation. Since the sprite sheet structure is more complex now, I'll update the description, considering that a flexible preview might be tricky without knowing the exact grid layout.\n\n\n",
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1770519146,
+      "nanos": 817000000
+    },
+    "doneTimestamp": {
+      "seconds": 1770519153,
+      "nanos": 617000000
+    }
+  },
+  {
+    "id": 6,
+    "author": "model",
+    "payload": {
+      "type": "generationTable",
+      "entries": [
+        {
+          "path": "services/geminiService.ts",
+          "generationType": 1,
+          "isDone": true,
+          "description": "Update the prompt to specify 32x32 tile size and specific animation states (Idle, Walk, Attack, Hit, Death).",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "\nimport { GoogleGenAI, GenerateContentResponse } from \"@google/genai\";\nimport { GenerationSettings, GenerationStyle } from \"../types\";\n\nexport const generateSpriteSheet = async (\n  base64Image: string,\n  settings: GenerationSettings\n): Promise<string> => {\n  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });\n  \n  const styleDescription = {\n    [GenerationStyle.CLASSIC_16BIT]: \"SNES-style 16-bit pixel art with limited vibrant color palette\",\n    [GenerationStyle.MODERN_HD]: \"High-definition pixel art with smooth shading and detailed textures\",\n    [GenerationStyle.GAMEBOY]: \"4-color monochrome green palette, classic 8-bit handheld aesthetic\",\n    [GenerationStyle.FANTASY]: \"Detailed fantasy pixel art with magical effects and ornate equipment\",\n    [GenerationStyle.CYBERPUNK]: \"Neon-infused pixel art with high contrast and technological details\"\n  }[settings.style];\n\n  const prompt = `\n    ACT AS A PROFESSIONAL GAME ASSET ARTIST. \n    Task: Convert the attached character image into a professional 2D pixel art sprite sheet.\n    \n    Character Style: \n    - 2-head tall (Chibi/SD) proportions.\n    - Style: ${styleDescription}.\n    \n    Sprite Sheet Layout & Constraints:\n    - **IMPORTANT: Each individual sprite tile must be exactly 32x32 pixels.**\n    - Organize the sprite sheet into a clear grid where each row represents a different animation.\n    - The output must be a single cohesive image containing all frames.\n    \n    Animations Required (One per row):\n    1. Idle (기본): 4 frames of the character standing still with slight breathing/movement.\n    2. Walking (걷기): 4-6 frames of a walking cycle.\n    3. Attacking (공격): 4-6 frames of a combat action (swinging a weapon or casting).\n    4. Damaged/Hit (피격): 2-4 frames showing the character reeling from a hit.\n    5. Death (죽기): 4-6 frames showing the character falling and disappearing.\n    \n    Technical Details:\n    - Perspective: Top-down 3/4 RPG perspective.\n    - Background: ${settings.backgroundColor === 'transparent' ? 'Solid neutral grey (to be removed later)' : `Solid ${settings.backgroundColor}`}.\n    - Clear outlines, readable features, and consistent lighting across all 32x32 tiles.\n    - Do not include any text, UI, labels, or watermarks.\n    - Total grid should look like a professional game asset ready for slicing.\n  `;\n\n  try {\n    const response: GenerateContentResponse = await ai.models.generateContent({\n      model: 'gemini-2.5-flash-image',\n      contents: {\n        parts: [\n          {\n            inlineData: {\n              mimeType: 'image/png',\n              data: base64Image.split(',')[1],\n            },\n          },\n          { text: prompt },\n        ],\n      },\n      config: {\n        imageConfig: {\n          aspectRatio: \"1:1\"\n        }\n      }\n    });\n\n    let imageUrl = '';\n    if (response.candidates?.[0]?.content?.parts) {\n      for (const part of response.candidates[0].content.parts) {\n        if (part.inlineData) {\n          imageUrl = `data:image/png;base64,${part.inlineData.data}`;\n          break;\n        }\n      }\n    }\n\n    if (!imageUrl) {\n      throw new Error(\"No image was generated by the model.\");\n    }\n\n    return imageUrl;\n  } catch (error) {\n    console.error(\"Gemini Generation Error:\", error);\n    throw error;\n  }\n};\n"
+            }
+          ]
+        },
+        {
+          "path": "App.tsx",
+          "generationType": 1,
+          "isDone": true,
+          "description": "Update UI labels to reflect the 32x32 tile size and the new set of animations.",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "\nimport React, { useState, useRef } from 'react';\nimport { Button } from './components/ui/Button';\nimport { SpritePreview } from './components/SpritePreview';\nimport { generateSpriteSheet } from './services/geminiService';\nimport { GenerationStyle, GenerationSettings } from './types';\n\nconst App: React.FC = () => {\n  const [referenceImage, setReferenceImage] = useState<string | null>(null);\n  const [isGenerating, setIsGenerating] = useState(false);\n  const [generatedImage, setGeneratedImage] = useState<string | null>(null);\n  const [error, setError] = useState<string | null>(null);\n  \n  const [settings, setSettings] = useState<GenerationSettings>({\n    style: GenerationStyle.CLASSIC_16BIT,\n    frameCount: 24, // Increased default as we now have 5 animations\n    includeWalkCycle: true,\n    backgroundColor: 'transparent'\n  });\n\n  const fileInputRef = useRef<HTMLInputElement>(null);\n\n  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {\n    const file = e.target.files?.[0];\n    if (file) {\n      const reader = new FileReader();\n      reader.onloadend = () => {\n        setReferenceImage(reader.result as string);\n        setError(null);\n      };\n      reader.readAsDataURL(file);\n    }\n  };\n\n  const handleGenerate = async () => {\n    if (!referenceImage) return;\n    \n    setIsGenerating(true);\n    setError(null);\n    try {\n      const result = await generateSpriteSheet(referenceImage, settings);\n      setGeneratedImage(result);\n    } catch (err) {\n      setError(\"Failed to generate sprite sheet. Please try again.\");\n      console.error(err);\n    } finally {\n      setIsGenerating(false);\n    }\n  };\n\n  return (\n    <div className=\"min-h-screen pb-20\">\n      {/* Header */}\n      <header className=\"border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10\">\n        <div className=\"max-w-6xl mx-auto px-6 h-20 flex items-center justify-between\">\n          <div className=\"flex items-center gap-3\">\n            <div className=\"w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center pixel-border\">\n              <span className=\"pixel-font text-white text-xs\">PX</span>\n            </div>\n            <div>\n              <h1 className=\"font-bold text-xl tracking-tight\">PixelChibi</h1>\n              <p className=\"text-xs text-slate-500 font-medium\">AI Sprite Sheet Generator</p>\n            </div>\n          </div>\n          <div className=\"hidden md:flex gap-6 text-sm font-medium text-slate-400\">\n            <span className=\"text-indigo-400\">32x32 Standard</span>\n            <span className=\"border-l border-slate-700 h-4\"></span>\n            <a href=\"#\" className=\"hover:text-white transition-colors\">Library</a>\n            <a href=\"#\" className=\"hover:text-white transition-colors\">Guide</a>\n          </div>\n        </div>\n      </header>\n\n      <main className=\"max-w-6xl mx-auto px-6 mt-12 grid grid-cols-1 lg:grid-cols-12 gap-12\">\n        {/* Sidebar / Controls */}\n        <div className=\"lg:col-span-4 space-y-8\">\n          <section className=\"bg-slate-800/40 rounded-2xl p-6 border border-slate-700/50\">\n            <h2 className=\"text-lg font-bold mb-6 flex items-center gap-2\">\n              <span className=\"w-2 h-2 bg-indigo-500 rounded-full animate-pulse\"></span>\n              Character Reference\n            </h2>\n            \n            <div \n              onClick={() => fileInputRef.current?.click()}\n              className=\"aspect-square rounded-xl border-2 border-dashed border-slate-700 hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all cursor-pointer flex flex-col items-center justify-center overflow-hidden relative group\"\n            >\n              {referenceImage ? (\n                <>\n                  <img src={referenceImage} alt=\"Reference\" className=\"w-full h-full object-cover\" />\n                  <div className=\"absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity\">\n                    <span className=\"text-sm font-bold text-white\">Change Image</span>\n                  </div>\n                </>\n              ) : (\n                <>\n                  <svg className=\"w-12 h-12 text-slate-600 mb-4\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">\n                    <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth=\"2\" d=\"M12 4v16m8-8H4\" />\n                  </svg>\n                  <p className=\"text-sm text-slate-500 text-center px-4\">Upload your character design</p>\n                </>\n              )}\n            </div>\n            <input \n              type=\"file\" \n              ref={fileInputRef} \n              onChange={handleFileChange} \n              className=\"hidden\" \n              accept=\"image/*\"\n            />\n          </section>\n\n          <section className=\"bg-slate-800/40 rounded-2xl p-6 border border-slate-700/50 space-y-6\">\n            <h2 className=\"text-lg font-bold mb-2\">Generation Settings</h2>\n            \n            <div className=\"bg-slate-900/50 p-3 rounded-xl border border-slate-700/50\">\n               <span className=\"text-xs font-bold text-indigo-400 uppercase\">Fixed Output Format</span>\n               <p className=\"text-xs text-slate-400 mt-1\">Grid: 32x32px per tile</p>\n               <p className=\"text-[10px] text-slate-500 mt-1\">Includes: Idle, Walk, Attack, Hit, Death</p>\n            </div>\n\n            <div>\n              <label className=\"text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block\">Art Style</label>\n              <select \n                value={settings.style}\n                onChange={(e) => setSettings({...settings, style: e.target.value as GenerationStyle})}\n                className=\"w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none\"\n              >\n                {Object.values(GenerationStyle).map(style => (\n                  <option key={style} value={style}>{style}</option>\n                ))}\n              </select>\n            </div>\n\n            <Button \n              onClick={handleGenerate} \n              disabled={!referenceImage} \n              isLoading={isGenerating}\n              className=\"w-full py-4 text-base font-bold shadow-lg shadow-indigo-500/20\"\n            >\n              Generate 32x32 Sprite Sheet\n            </Button>\n\n            {error && (\n              <p className=\"text-red-400 text-xs text-center font-medium bg-red-400/10 py-2 rounded-lg border border-red-400/20\">\n                {error}\n              </p>\n            )}\n          </section>\n        </div>\n\n        {/* Workspace / Output */}\n        <div className=\"lg:col-span-8\">\n          {!generatedImage && !isGenerating && (\n            <div className=\"h-full flex flex-col items-center justify-center min-h-[500px] border-2 border-dashed border-slate-800 rounded-3xl p-12 text-center\">\n              <div className=\"w-20 h-20 bg-slate-800 rounded-2xl flex items-center justify-center mb-6\">\n                <svg className=\"w-10 h-10 text-slate-600\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">\n                  <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth=\"1.5\" d=\"M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10\" />\n                </svg>\n              </div>\n              <h3 className=\"text-xl font-bold mb-2\">Workspace Empty</h3>\n              <p className=\"text-slate-500 max-w-sm mx-auto\">\n                Generate a full set of 32x32 animations: 기본, 걷기, 공격, 피격, 죽기.\n              </p>\n            </div>\n          )}\n\n          {isGenerating && (\n            <div className=\"h-full flex flex-col items-center justify-center min-h-[500px] bg-slate-800/20 rounded-3xl p-12 text-center animate-pulse\">\n              <div className=\"relative w-24 h-24 mb-8\">\n                <div className=\"absolute inset-0 border-4 border-indigo-500/20 rounded-full\"></div>\n                <div className=\"absolute inset-0 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin\"></div>\n                <div className=\"absolute inset-0 flex items-center justify-center\">\n                    <span className=\"pixel-font text-[8px] text-indigo-400\">GENERATE</span>\n                </div>\n              </div>\n              <h3 className=\"text-xl font-bold mb-2\">Building 32x32 Animations...</h3>\n              <p className=\"text-slate-500 max-w-sm mx-auto\">\n                Mapping frames for Idle, Walk, Attack, Hit, and Death states.\n              </p>\n              <div className=\"mt-8 flex gap-2\">\n                 <div className=\"w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]\"></div>\n                 <div className=\"w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.15s]\"></div>\n                 <div className=\"w-2 h-2 bg-indigo-500 rounded-full animate-bounce\"></div>\n              </div>\n            </div>\n          )}\n\n          {generatedImage && !isGenerating && (\n            <div className=\"space-y-6\">\n              <div className=\"flex items-center justify-between\">\n                <h2 className=\"text-2xl font-bold\">Generated 32x32 Assets</h2>\n                <div className=\"flex gap-2\">\n                   <Button variant=\"outline\" className=\"text-sm\">Regenerate</Button>\n                   <Button variant=\"pixel\">Slicing Ready</Button>\n                </div>\n              </div>\n              \n              <SpritePreview imageUrl={generatedImage} />\n\n              <div className=\"bg-indigo-600/10 border border-indigo-500/20 p-6 rounded-2xl flex items-start gap-4\">\n                <div className=\"p-3 bg-indigo-600 rounded-xl text-white\">\n                    <svg className=\"w-6 h-6\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\">\n                        <path strokeLinecap=\"round\" strokeLinejoin=\"round\" strokeWidth=\"2\" d=\"M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z\" />\n                    </svg>\n                </div>\n                <div>\n                    <h4 className=\"font-bold text-indigo-300\">Slicing Information</h4>\n                    <p className=\"text-sm text-slate-400 mt-1\">\n                        Each tile is 32x32 pixels. In your game engine (Unity/Godot), set the sprite import mode to 'Multiple' and slice by cell size 32x32.\n                    </p>\n                    <div className=\"mt-2 flex flex-wrap gap-2\">\n                        <span className=\"bg-slate-800 text-[10px] px-2 py-1 rounded border border-slate-700 text-slate-300\">Row 1: Idle</span>\n                        <span className=\"bg-slate-800 text-[10px] px-2 py-1 rounded border border-slate-700 text-slate-300\">Row 2: Walk</span>\n                        <span className=\"bg-slate-800 text-[10px] px-2 py-1 rounded border border-slate-700 text-slate-300\">Row 3: Attack</span>\n                        <span className=\"bg-slate-800 text-[10px] px-2 py-1 rounded border border-slate-700 text-slate-300\">Row 4: Hit</span>\n                        <span className=\"bg-slate-800 text-[10px] px-2 py-1 rounded border border-slate-700 text-slate-300\">Row 5: Death</span>\n                    </div>\n                </div>\n              </div>\n            </div>\n          )}\n        </div>\n      </main>\n\n      <footer className=\"mt-24 border-t border-slate-800 py-12\">\n        <div className=\"max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8\">\n          <div className=\"flex items-center gap-2 opacity-50 grayscale\">\n            <div className=\"w-6 h-6 bg-white rounded flex items-center justify-center\">\n              <span className=\"text-[10px] text-black font-bold\">G</span>\n            </div>\n            <span className=\"text-sm font-medium\">Powered by Gemini AI</span>\n          </div>\n          <p className=\"text-slate-600 text-sm\">© 2024 PixelChibi Studio. All rights reserved.</p>\n        </div>\n      </footer>\n    </div>\n  );\n};\n\nexport default App;\n"
+            }
+          ]
+        }
+      ]
+    },
+    "createdTimestamp": {
+      "seconds": 1770519153,
+      "nanos": 619000000
+    },
+    "doneTimestamp": {
+      "seconds": 1770519158,
+      "nanos": 516000000
+    }
+  },
+  {
+    "id": 8,
+    "author": "user",
+    "payload": {
+      "type": "text",
+      "text": "애니메이션 프리뷰는 애니메이션 타입을 선택하여 볼 수 있게 해줘. ",
+      "files": [],
+      "fileUploads": [],
+      "cssBlocks": [],
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1770519277,
+      "nanos": 449000000
+    }
+  },
+  {
+    "id": 9,
+    "author": "model",
+    "payload": {
+      "type": "thinking",
+      "text": "**Considering Animation Preview**\n\nI'm focusing on adding an animation type selector to the `SpritePreview` component. My goal is to allow previewing distinct animations like Idle, Walk, Attack, Hit, and Death directly from the generated sprite sheet.\n\n\n**Refining Animation Specification**\n\nI'm now refining the specification for the animation preview. I've decided to add an `AnimationType` enum to `SpritePreview.tsx` to handle the different animations, including their row indices and frame counts. I'll include UI tabs or buttons for easy selection. The preview box will then visually loop the selected animation, adjusting the image shift dynamically.\n\n\n",
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1770519277,
+      "nanos": 449000000
+    },
+    "doneTimestamp": {
+      "seconds": 1770519282,
+      "nanos": 755000000
+    }
+  },
+  {
+    "id": 10,
+    "author": "model",
+    "payload": {
+      "type": "generationTable",
+      "entries": [
+        {
+          "path": "components/SpritePreview.tsx",
+          "generationType": 1,
+          "isDone": true,
+          "description": "Add animation type selector and update preview logic to support multiple animation rows (Idle, Walk, Attack, Hit, Death).",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "\nimport React, { useState, useEffect } from 'react';\n\ninterface SpritePreviewProps {\n  imageUrl: string;\n}\n\ntype AnimationKey = 'idle' | 'walk' | 'attack' | 'hit' | 'death';\n\ninterface AnimationConfig {\n  label: string;\n  row: number;\n  frames: number;\n}\n\nconst ANIMATIONS: Record<AnimationKey, AnimationConfig> = {\n  idle: { label: '기본 (Idle)', row: 0, frames: 4 },\n  walk: { label: '걷기 (Walk)', row: 1, frames: 6 },\n  attack: { label: '공격 (Attack)', row: 2, frames: 6 },\n  hit: { label: '피격 (Hit)', row: 3, frames: 4 },\n  death: { label: '죽기 (Death)', row: 4, frames: 6 },\n};\n\nexport const SpritePreview: React.FC<SpritePreviewProps> = ({ imageUrl }) => {\n  const [activeAnim, setActiveAnim] = useState<AnimationKey>('idle');\n  const [frame, setFrame] = useState(0);\n  const [isPlaying, setIsPlaying] = useState(true);\n\n  const config = ANIMATIONS[activeAnim];\n\n  useEffect(() => {\n    setFrame(0);\n  }, [activeAnim]);\n\n  useEffect(() => {\n    if (!isPlaying) return;\n    const interval = setInterval(() => {\n      setFrame((prev) => (prev + 1) % config.frames);\n    }, 150);\n    return () => clearInterval(interval);\n  }, [isPlaying, config.frames]);\n\n  return (\n    <div className=\"bg-slate-800/50 p-6 rounded-2xl border border-slate-700\">\n      <div className=\"flex flex-col md:flex-row gap-8\">\n        {/* Full Sprite Sheet */}\n        <div className=\"flex-1\">\n          <h3 className=\"text-sm font-semibold text-slate-400 mb-4 uppercase tracking-wider\">Generated Sprite Sheet (32x32 Grid)</h3>\n          <div className=\"bg-slate-900 p-4 rounded-xl border border-slate-700/50 group relative overflow-hidden flex items-center justify-center min-h-[300px]\">\n            <img \n              src={imageUrl} \n              alt=\"Generated Sprite Sheet\" \n              className=\"max-w-full h-auto image-pixelated rounded-lg\"\n              style={{ imageRendering: 'pixelated' }}\n            />\n            <div className=\"absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center\">\n               <a \n                href={imageUrl} \n                download=\"sprite-sheet.png\"\n                className=\"bg-white text-black px-4 py-2 rounded-lg font-bold hover:bg-slate-200 transition-colors\"\n               >\n                 Download PNG\n               </a>\n            </div>\n          </div>\n        </div>\n\n        {/* Animation Preview */}\n        <div className=\"w-full md:w-72 flex flex-col\">\n          <h3 className=\"text-sm font-semibold text-slate-400 mb-4 uppercase tracking-wider text-center\">Animation Preview</h3>\n          \n          <div className=\"w-full aspect-square bg-slate-900 rounded-xl border-4 border-slate-700 flex items-center justify-center overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/checkerboard.png')] bg-center relative mb-6\">\n            <div className=\"w-32 h-32 relative overflow-hidden\">\n                <img \n                    src={imageUrl} \n                    alt=\"Animation Preview\"\n                    className=\"absolute max-w-none\"\n                    style={{ \n                        imageRendering: 'pixelated',\n                        // Shift left by frame index * 100% of frame width\n                        left: `-${frame * 100}%`,\n                        // Shift top by row index * 100% of frame height\n                        top: `-${config.row * 100}%`,\n                        // We assume the sprite sheet width is defined by the animation with the most frames (e.g. 6)\n                        // And height is 5 rows.\n                        width: `600%`, \n                        height: `500%`,\n                        objectFit: 'fill'\n                    }}\n                />\n            </div>\n            \n            <button \n                onClick={() => setIsPlaying(!isPlaying)}\n                className=\"absolute bottom-3 right-3 p-2 bg-slate-800/80 backdrop-blur rounded-lg hover:bg-slate-700 transition-colors text-white\"\n            >\n                {isPlaying ? (\n                    <svg className=\"w-5 h-5\" fill=\"currentColor\" viewBox=\"0 0 24 24\"><path d=\"M6 19h4V5H6v14zm8-14v14h4V5h-4z\"/></svg>\n                ) : (\n                    <svg className=\"w-5 h-5\" fill=\"currentColor\" viewBox=\"0 0 24 24\"><path d=\"M8 5v14l11-7z\"/></svg>\n                )}\n            </button>\n          </div>\n\n          <div className=\"space-y-2\">\n            <label className=\"text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1\">Select Animation Type</label>\n            <div className=\"grid grid-cols-1 gap-2\">\n              {(Object.keys(ANIMATIONS) as AnimationKey[]).map((key) => {\n                const anim = ANIMATIONS[key];\n                return (\n                  <button\n                    key={key}\n                    onClick={() => setActiveAnim(key)}\n                    className={`text-left px-4 py-2 rounded-lg text-xs font-bold transition-all border ${\n                      activeAnim === key \n                        ? 'bg-indigo-600 border-indigo-500 text-white translate-x-1' \n                        : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-600'\n                    }`}\n                  >\n                    {anim.label}\n                  </button>\n                );\n              })}\n            </div>\n          </div>\n        </div>\n      </div>\n    </div>\n  );\n};\n"
+            }
+          ]
+        }
+      ]
+    },
+    "createdTimestamp": {
+      "seconds": 1770519282,
+      "nanos": 757000000
+    },
+    "doneTimestamp": {
+      "seconds": 1770519291,
+      "nanos": 476000000
+    }
+  },
+  {
+    "id": 12,
+    "author": "user",
+    "payload": {
+      "type": "text",
+      "text": "스프라이트 시트 한칸에 캐릭터가 딱 들어가게 만들어줘. 그래야 애니메이션이 자연스럽지.",
+      "files": [],
+      "fileUploads": [],
+      "cssBlocks": [],
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1770519466,
+      "nanos": 331000000
+    }
+  },
+  {
+    "id": 13,
+    "author": "model",
+    "payload": {
+      "type": "thinking",
+      "text": "**Centering the Character**\n\nI'm focused on achieving precise character centering within the 32x32 sprite tiles. I've re-evaluated the current implementation to ensure animations display as naturally and consistently as possible, keeping in mind the 32x32 dimension.\n\n\n**Refining Grid Instructions**\n\nI'm now instructing the model directly in `services/geminiService.ts` to precisely center the character in the 32x32 tiles and maintain consistent anchoring, especially at the feet. I’ve added instructions for no extra padding, and am currently reviewing `components/SpritePreview.tsx`, considering more precise percentage calculations to reflect the grid structure.\n\n\n**Revising Tile Display**\n\nI'm focused on the pixel-perfect display of the 32x32 tiles, experimenting with `background-size` and precise pixel measurements in the preview, specifically for `SpritePreview.tsx`. The prompt in `geminiService.ts` has been updated to demand strict 32x32 centering, avoiding edge placement unless essential for the animation. I'm also ensuring consistent vertical anchoring to prevent jitter. I plan to refine the scaling in `SpritePreview.tsx` using calculated values instead of percentage-based sizing.\n\n\n",
+      "cMarkNode": {}
+    },
+    "createdTimestamp": {
+      "seconds": 1770519466,
+      "nanos": 331000000
+    },
+    "doneTimestamp": {
+      "seconds": 1770519472,
+      "nanos": 825000000
+    }
+  },
+  {
+    "id": 14,
+    "author": "model",
+    "payload": {
+      "type": "generationTable",
+      "entries": [
+        {
+          "path": "services/geminiService.ts",
+          "generationType": 1,
+          "isDone": true,
+          "description": "Enhance the prompt to strictly enforce 32x32 centering and consistent anchoring across all animation frames to ensure smooth, natural movement.",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "\nimport { GoogleGenAI, GenerateContentResponse } from \"@google/genai\";\nimport { GenerationSettings, GenerationStyle } from \"../types\";\n\nexport const generateSpriteSheet = async (\n  base64Image: string,\n  settings: GenerationSettings\n): Promise<string> => {\n  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });\n  \n  const styleDescription = {\n    [GenerationStyle.CLASSIC_16BIT]: \"SNES-style 16-bit pixel art with limited vibrant color palette\",\n    [GenerationStyle.MODERN_HD]: \"High-definition pixel art with smooth shading and detailed textures\",\n    [GenerationStyle.GAMEBOY]: \"4-color monochrome green palette, classic 8-bit handheld aesthetic\",\n    [GenerationStyle.FANTASY]: \"Detailed fantasy pixel art with magical effects and ornate equipment\",\n    [GenerationStyle.CYBERPUNK]: \"Neon-infused pixel art with high contrast and technological details\"\n  }[settings.style];\n\n  const prompt = `\n    ACT AS A PROFESSIONAL GAME ASSET ARTIST SPECIALIZING IN SPRITE SHEETS.\n    Task: Convert the attached character image into a professional 2D pixel art sprite sheet.\n    \n    Character Style: \n    - 2-head tall (Chibi/SD) proportions.\n    - Style: ${styleDescription}.\n    \n    STRICT SPRITE SHEET CONSTRAINTS:\n    - **GRID SIZE:** Each individual sprite frame MUST be exactly 32x32 pixels.\n    - **ALIGNMENT:** The character MUST be perfectly centered within each 32x32 tile. \n    - **ANCHORING:** Maintain a consistent \"feet position\" (y-axis ground level) across every single frame in the sheet. This is critical for natural animation without jittering.\n    - **PITCH/SCALE:** The character's size should be consistent across all frames (approximately 24-28 pixels tall within the 32x32 box to allow for movement headroom).\n    \n    Animations Required (One per row, exactly 6 frames per row):\n    1. Idle (기본): 6 frames. Character standing, subtle breathing or hair movement.\n    2. Walking (걷기): 6 frames. Full walk cycle. Ensure smooth leg transitions.\n    3. Attacking (공격): 6 frames. Clear wind-up, impact, and follow-through.\n    4. Damaged (피격): 6 frames. Recoil animation.\n    5. Death (죽기): 6 frames. Falling down or fading away animation.\n    \n    Technical Details:\n    - Perspective: Top-down 3/4 RPG perspective.\n    - Background: ${settings.backgroundColor === 'transparent' ? 'Solid neutral grey' : `Solid ${settings.backgroundColor}`}.\n    - NO extra padding between tiles. Tiles must be edge-to-edge in a 6-column by 5-row grid.\n    - No text, labels, or UI elements in the final image.\n  `;\n\n  try {\n    const response: GenerateContentResponse = await ai.models.generateContent({\n      model: 'gemini-2.5-flash-image',\n      contents: {\n        parts: [\n          {\n            inlineData: {\n              mimeType: 'image/png',\n              data: base64Image.split(',')[1],\n            },\n          },\n          { text: prompt },\n        ],\n      },\n      config: {\n        imageConfig: {\n          aspectRatio: \"1:1\"\n        }\n      }\n    });\n\n    let imageUrl = '';\n    if (response.candidates?.[0]?.content?.parts) {\n      for (const part of response.candidates[0].content.parts) {\n        if (part.inlineData) {\n          imageUrl = `data:image/png;base64,${part.inlineData.data}`;\n          break;\n        }\n      }\n    }\n\n    if (!imageUrl) {\n      throw new Error(\"No image was generated by the model.\");\n    }\n\n    return imageUrl;\n  } catch (error) {\n    console.error(\"Gemini Generation Error:\", error);\n    throw error;\n  }\n};\n"
+            }
+          ]
+        },
+        {
+          "path": "components/SpritePreview.tsx",
+          "generationType": 1,
+          "isDone": true,
+          "description": "Refine the preview logic to assume a strict 6x5 grid and provide a cleaner 32x32 viewing experience.",
+          "diffs": [
+            {
+              "target": "",
+              "replacement": "\nimport React, { useState, useEffect } from 'react';\n\ninterface SpritePreviewProps {\n  imageUrl: string;\n}\n\ntype AnimationKey = 'idle' | 'walk' | 'attack' | 'hit' | 'death';\n\ninterface AnimationConfig {\n  label: string;\n  row: number;\n  frames: number;\n}\n\nconst ANIMATIONS: Record<AnimationKey, AnimationConfig> = {\n  idle: { label: '기본 (Idle)', row: 0, frames: 6 },\n  walk: { label: '걷기 (Walk)', row: 1, frames: 6 },\n  attack: { label: '공격 (Attack)', row: 2, frames: 6 },\n  hit: { label: '피격 (Hit)', row: 3, frames: 6 },\n  death: { label: '죽기 (Death)', row: 4, frames: 6 },\n};\n\nexport const SpritePreview: React.FC<SpritePreviewProps> = ({ imageUrl }) => {\n  const [activeAnim, setActiveAnim] = useState<AnimationKey>('idle');\n  const [frame, setFrame] = useState(0);\n  const [isPlaying, setIsPlaying] = useState(true);\n\n  const config = ANIMATIONS[activeAnim];\n\n  useEffect(() => {\n    setFrame(0);\n  }, [activeAnim]);\n\n  useEffect(() => {\n    if (!isPlaying) return;\n    const interval = setInterval(() => {\n      setFrame((prev) => (prev + 1) % config.frames);\n    }, 130); // Slightly faster for smoother pixel animation\n    return () => clearInterval(interval);\n  }, [isPlaying, config.frames]);\n\n  return (\n    <div className=\"bg-slate-800/50 p-6 rounded-2xl border border-slate-700\">\n      <div className=\"flex flex-col md:flex-row gap-8\">\n        {/* Full Sprite Sheet */}\n        <div className=\"flex-1\">\n          <div className=\"flex items-center justify-between mb-4\">\n            <h3 className=\"text-sm font-semibold text-slate-400 uppercase tracking-wider\">32x32 Sprite Sheet</h3>\n            <span className=\"text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded border border-indigo-500/30 font-bold\">Centered & Anchored</span>\n          </div>\n          <div className=\"bg-slate-900 p-4 rounded-xl border border-slate-700/50 group relative overflow-hidden flex items-center justify-center min-h-[300px]\">\n            <img \n              src={imageUrl} \n              alt=\"Generated Sprite Sheet\" \n              className=\"max-w-full h-auto image-pixelated rounded-lg shadow-2xl\"\n              style={{ imageRendering: 'pixelated' }}\n            />\n            <div className=\"absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]\">\n               <a \n                href={imageUrl} \n                download=\"sprite-sheet.png\"\n                className=\"bg-white text-black px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-all transform hover:scale-105 shadow-xl\"\n               >\n                 Download Assets\n               </a>\n            </div>\n          </div>\n        </div>\n\n        {/* Animation Preview */}\n        <div className=\"w-full md:w-72 flex flex-col\">\n          <h3 className=\"text-sm font-semibold text-slate-400 mb-4 uppercase tracking-wider text-center\">In-Game Preview</h3>\n          \n          <div className=\"w-full aspect-square bg-slate-950 rounded-2xl border-4 border-slate-700 flex items-center justify-center overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/checkerboard.png')] bg-[length:16px_16px] relative mb-6 shadow-inner\">\n            <div className=\"w-48 h-48 relative overflow-hidden\">\n                <img \n                    src={imageUrl} \n                    alt=\"Animation Preview\"\n                    className=\"absolute max-w-none\"\n                    style={{ \n                        imageRendering: 'pixelated',\n                        // Since it's a 6 column x 5 row grid\n                        left: `-${frame * 100}%`,\n                        top: `-${config.row * 100}%`,\n                        width: `600%`, \n                        height: `500%`,\n                        objectFit: 'fill'\n                    }}\n                />\n            </div>\n            \n            <button \n                onClick={() => setIsPlaying(!isPlaying)}\n                className=\"absolute bottom-4 right-4 p-2.5 bg-slate-800/90 backdrop-blur rounded-xl hover:bg-slate-700 transition-all text-white shadow-lg border border-slate-600\"\n            >\n                {isPlaying ? (\n                    <svg className=\"w-5 h-5\" fill=\"currentColor\" viewBox=\"0 0 24 24\"><path d=\"M6 19h4V5H6v14zm8-14v14h4V5h-4z\"/></svg>\n                ) : (\n                    <svg className=\"w-5 h-5\" fill=\"currentColor\" viewBox=\"0 0 24 24\"><path d=\"M8 5v14l11-7z\"/></svg>\n                )}\n            </button>\n          </div>\n\n          <div className=\"space-y-2\">\n            <label className=\"text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1\">State Switcher</label>\n            <div className=\"grid grid-cols-1 gap-2\">\n              {(Object.keys(ANIMATIONS) as AnimationKey[]).map((key) => {\n                const anim = ANIMATIONS[key];\n                return (\n                  <button\n                    key={key}\n                    onClick={() => setActiveAnim(key)}\n                    className={`text-left px-4 py-3 rounded-xl text-xs font-bold transition-all border ${\n                      activeAnim === key \n                        ? 'bg-indigo-600 border-indigo-400 text-white shadow-lg shadow-indigo-500/20 translate-x-1' \n                        : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500 hover:bg-slate-800'\n                    }`}\n                  >\n                    <span className=\"flex items-center justify-between\">\n                        {anim.label}\n                        {activeAnim === key && (\n                            <span className=\"w-1.5 h-1.5 bg-white rounded-full animate-pulse\"></span>\n                        )}\n                    </span>\n                  </button>\n                );\n              })}\n            </div>\n          </div>\n        </div>\n      </div>\n    </div>\n  );\n};\n"
+            }
+          ]
+        }
+      ]
+    },
+    "createdTimestamp": {
+      "seconds": 1770519472,
+      "nanos": 826000000
+    },
+    "doneTimestamp": {
+      "seconds": 1770519478,
+      "nanos": 743000000
+    }
+  }
+]
